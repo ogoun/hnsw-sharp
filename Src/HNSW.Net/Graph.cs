@@ -150,7 +150,7 @@ namespace HNSW.Net
         /// <param name="destination">The given node to get the nearest neighbourhood for.</param>
         /// <param name="k">The size of the neighbourhood.</param>
         /// <returns>The list of the nearest neighbours.</returns>
-        internal IList<SmallWorld<TItem, TDistance>.KNNSearchResult> KNearest(TItem destination, int k)
+        internal IList<SmallWorld<TItem, TDistance>.KNNSearchResult> KNearest(TItem destination, int k, FilterFactory filterFactory = null)
         {
             using (new ScopeLatencyTracker(GraphSearchEventSource.Instance?.GraphKNearestLatencyReporter))
             {
@@ -174,7 +174,7 @@ namespace HNSW.Net
                     resultIds.Clear();
                 }
 
-                visitedNodesCount += searcher.RunKnnAtLayer(bestPeer.Id, destiantionTravelingCosts, resultIds, 0, k);
+                visitedNodesCount += searcher.RunKnnAtLayer(bestPeer.Id, destiantionTravelingCosts, resultIds, 0, k, filterFactory);
                 GraphSearchEventSource.Instance?.GraphKNearestVisitedNodesReporter?.Invoke(visitedNodesCount);
 
                 return resultIds.Select(id => new SmallWorld<TItem, TDistance>.KNNSearchResult(id, GraphCore.Items[id],RuntimeDistance(id, -1))).ToList();

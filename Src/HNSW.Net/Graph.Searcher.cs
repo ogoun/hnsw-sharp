@@ -42,7 +42,7 @@ namespace HNSW.Net
             /// <param name="layer">The layer to perform search at.</param>
             /// <param name="k">The number of the nearest neighbours to get from the layer.</param>
             /// <returns>The number of expanded nodes during the run.</returns>
-            internal int RunKnnAtLayer(int entryPointId, TravelingCosts<int, TDistance> targetCosts, List<int> resultList, int layer, int k)
+            internal int RunKnnAtLayer(int entryPointId, TravelingCosts<int, TDistance> targetCosts, List<int> resultList, int layer, int k, FilterFactory filterFactory = null)
             {
                 /*
                  * v ← ep // set of visited elements
@@ -66,6 +66,7 @@ namespace HNSW.Net
                  */
 
                 // prepare tools
+                IFilter filter = filterFactory?.GetFilter() ?? null;
                 IComparer<int> fartherIsOnTop = targetCosts;
                 IComparer<int> closerIsOnTop = fartherIsOnTop.Reverse();
 
@@ -100,6 +101,13 @@ namespace HNSW.Net
                         {
                             // enqueue perspective neighbours to expansion list
                             farthestResultId = resultHeap.Buffer[0];
+
+                            // append filter to identity
+                            if (filter != null && resultHeap.Buffer.Count >= k)
+                            {
+                                resultHeap.ApplyFilter(heap => filter.Filter(heap));
+                            }
+
                             if (resultHeap.Buffer.Count < k
                             || DistanceUtils.LowerThan(targetCosts.From(neighbourId), targetCosts.From(farthestResultId)))
                             {

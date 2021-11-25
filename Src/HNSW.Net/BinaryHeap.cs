@@ -49,6 +49,11 @@ namespace HNSW.Net
             throw new InvalidOperationException("Heap is empty");
         }
 
+        internal void ApplyFilter(Func<IEnumerable<T>, IEnumerable<T>> filter)
+        {
+            Buffer = new List<T>(filter(Buffer));
+        }
+
         /// <summary>
         /// Restores the heap property starting from i'th position down to the bottom given that the downstream items fulfill the rule.
         /// </summary>
